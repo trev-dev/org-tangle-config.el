@@ -3,7 +3,7 @@
 ;; Copyright (C) Trevor Richards
 
 ;; Author: Trevor Richards <trev@trevdev.ca>
-;; Version: 0.3.1
+;; Version: 0.4.0
 ;; Keywords: performance, utility
 ;; URL: https://github.com/trev-dev/org-tangle-config.el
 
@@ -25,8 +25,8 @@
 ;; This package contains a small function library for comparing your .org
 ;; configuration file against a hash of a previous version of that file.
 ;; If the hashes do not match, or your config.el is missing, it will use
-;; org-babel-tangle-file to create a new config.el.  The last known hash
-;; is stored in a custom variable.
+;; org-babel-tangle-file to create a new config.el.  The last known hash(s) are
+;; cached in the Emacs user dir & stored in a variable.
 
 ;;;  Example:
 ;; ;; In early init
