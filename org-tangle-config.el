@@ -3,7 +3,7 @@
 ;; Copyright (C) Trevor Richards
 
 ;; Author: Trevor Richards <trev@trevdev.ca>
-;; Version: 0.3.0
+;; Version: 0.3.1
 ;; Keywords: performance, utility
 ;; URL: https://github.com/trev-dev/org-tangle-config.el
 
@@ -23,15 +23,15 @@
 
 ;;; Commentary:
 ;; This package contains a small function library for comparing your .org
-;; configuration file against a timestamp of a previous version of that file.
-;; If the timestamps do not match, or your config.el is missing, it will use
-;; org-babel-tangle-file to create a new config.el.  The stamp is stored
-;; in a hidden file that is the same as your config file name with the .prev
-;; extension
+;; configuration file against a hash of a previous version of that file.
+;; If the hashes do not match, or your config.el is missing, it will use
+;; org-babel-tangle-file to create a new config.el.  The last known hash
+;; is stored in a custom variable.
 
 ;;;  Example:
+;; ;; In early init
+;; (add-to-list 'load-path "/path/to/org-tangle-config")
 ;; (require 'org-tangle-config)
-;; If no path is provided the default is "~/.emacs.d/config.org"
 ;; (org-tangle-config-before-load "/path/to/file.org")
 
 ;;; Code:
