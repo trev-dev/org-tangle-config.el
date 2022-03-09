@@ -1,0 +1,93 @@
+* Org Tangle Config
+This package was written out of the necessity to be able to tangle my literate Emacs init file on-demand without having to =(require 'org)= early in my =init.el=. This solution works better than =org-babel-load-file= for myself because I sometimes like to play around with package managers or different versions of org.
+
+This package has 3 goals in mind.
+
+1. Be able to call a tangle on demand.
+2. Be able to automatically tangle a configuration org file after initialization, or after saving said configuration.
+3. Be very explicit about what a "change in configuration" is, and which specific file on a machine is a configuration file.
+
+To properly tangle (and re-tangle) the configuration, a configuration file should be explicitly set  with =org-tangle-config-org-file=. Your method of tangling should then store a subsequent hash of that file's contents (=org-tangle-config-hash=) for referring to later.
+
+** Installation
+As I am not yet on Melpa, or any of the other elpas, you can use something like [[https://github.com/raxod502/straight.el][straight.el]] for convenience, or manually clone this repository and load it.
+
+straight.el
+#+begin_src elisp
+(straight-use-package '(org-tangle-config :type git :host github :repo "trev-dev/org-tangle-config.el"))
+#+end_src
+
+Manually:
+=git clone git@github.com:raxod502/straight.el.git /path/to/package=
+#+begin_src elisp
+(add-to-list 'load-path "/path/to/package")
+(require 'org-tangle-config)
+#+end_src
+
+Basic setup example:
+#+begin_src elisp
+;; Where I presumably might keep this package.
+(add-to-list 'load-path "~/.local/lib/emacs-packages")
+
+(require 'org-tangle-config)
+;; Check the version of config.org before loading config.el
+(org-tangle-config-before-load "~/.config/emacs/config.org")
+#+end_src
+
+After you've installed the package, and perhaps remove the use of =org-babel-load-file=, make sure to set your source code parameters to =:tangle yes=, or this package won't be very helpful to you.
+
+** Customization options
+You have the following configuration/customization options at your disposal:
+
+*** Variables
+1. =org-tangle-config-org-file= *Required:* The location of your literate configuration file.
+2. =org-tangle-config-enable= - Customize to =t= if you want the =org-tangle-config-org-file= to re-tangle automatically after it is saved.
+*** Functions
+1. =(org-tangle-config-before-load (&optional config))= - Check the version of your configuration against the last known hash. If it's divergent, re-tangle your configuration. If it's the same, load the existing "config.el".
+2. =(org-tangle-config)= {interactive} - Tangle your config on demand, if there is a new version to be tangled.
+3. =(org-tangle-config-enable)= {interactive} - Toggle the auto-tangling of your configuration with the =after-save-hook=.
+
+** More examples
+Use straight.el, explicitly set configuration file, enable auto-tangling:
+#+begin_src elisp
+;; Bootstrap straight.el
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(straight-use-package
+ '(org-tangle-config
+   :type git
+   :host github
+   :repo "trev-dev/org-tangle-config.el"))
+
+(setq org-tangle-config-org-file "~/.emacs.d/config.org"
+      org-tangle-config-enable t)
+#+end_src
+
+"I prefer to compose it myself"
+#+begin_src elisp
+(load "~/Projects/org-tangle-config/org-tangle-config.el")
+(org-tangle-config-do-tangle
+ (org-tangle-config-new-hash
+  (org-tangle-config-get-hash
+   (set
+    'org-tangle-config-org-file
+    "~/.config/emacs/config.org")))
+ t) ; inhibit pop-up message.
+(org-tangle-config-load
+ (org-tangle-config-get-config
+  "~/.config/emacs/config.org"))
+#+end_src
+
+* License
+[[file:license.txt][file:gplv3.png]]
