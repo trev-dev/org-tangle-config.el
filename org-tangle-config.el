@@ -40,13 +40,16 @@
   "Compare your config against an old version before tangling it."
   :group 'tools)
 
+(defvar org-tangle-config-hashes nil
+  "A plist of the last known config file and version hashes.")
+
+(defconst org-tangle-config-hash-storage (expand-file-name
+                                          (concat
+                                           user-emacs-directory "otc-hashes"))
+  "The location of the stored config hash plist.")
+
 (defcustom org-tangle-config-org-file nil
   "The location of your .org formatted configuration file."
-  :type 'string
-  :group 'org-tangle-config)
-
-(defcustom org-tangle-config-hash nil
-  "A basic cryptographic hash of the last known config version."
   :type 'string
   :group 'org-tangle-config)
 
@@ -67,27 +70,57 @@ After that, add or remove the auto-save hook as needed."
 
 ;;; Functions:
 (defun org-tangle-config-get-hash (path)
-  "Get the modified time of a file from a PATH if it exists."
+  "Retrieve a plist containing the path and file has from a given `PATH'.
+Throw an error if the file does not exist."
   (if (file-exists-p (expand-file-name path))
-      (with-temp-buffer
-       (insert-file-contents path)
-       (buffer-hash))
+      (list path (with-temp-buffer
+                   (insert-file-contents path)
+                   (buffer-hash)))
     (error (format "Org file configuration %s could not be found"
                    (expand-file-name path)))))
 
+(defun org-tangle-config-save-hashes (hashes)
+  "Cache the `HASHES' to the file system in the Emacs init directory."
+  (when (not (listp hashes))
+    (error "Malformed data in config hashes"))
+  (setq pp-max-width 79)
+  (setq pp-use-pax-width t)
+  (with-temp-buffer
+    (insert ";;; -*- lisp-data -*-\n")
+    (pp hashes (current-buffer))
+    (write-region nil nil org-tangle-config-hash-storage nil 'silent))
+  hashes)
+
 (defun org-tangle-config-record-hash (new-hash)
   "Save the `NEW-HASH' hash to the `org-tangle-config-hash' variable."
-  (customize-save-variable
-   'org-tangle-config-hash
-   new-hash
-   (format "Last updated %s" (current-time-string)))
-  new-hash)
+  (pcase new-hash
+    (`(,conf ,hash)
+     (setq org-tangle-config-hashes
+           (plist-put org-tangle-config-hashes (intern conf) hash))))
+    (org-tangle-config-save-hashes org-tangle-config-hashes))
+
+(defun org-tangle-config-read-hashes ()
+  "Read the `org-tangle-config-hashes' for valid data.
+Attempt to load a cache from the filesystem if the variable is nil.
+Return an empty list if neither is valid."
+  (if (not org-tangle-config-hashes)
+      (set 'org-tangle-config-hashes
+           (when (file-exists-p org-tangle-config-hash-storage)
+             (with-temp-buffer
+               (insert-file-contents org-tangle-config-hash-storage)
+               (read (current-buffer))
+               )))
+    org-tangle-config-hashes))
 
 (defun org-tangle-config-new-hash (next-hash)
-  "Compare the `NEXT-HASH' to the stored `org-tangle-config-hash'.
+  "Compare the `NEXT-HASH' to the stored plist `org-tangle-config-hash'.
 Return `NEXT-HASH' if it is new."
-  (when (not (equal org-tangle-config-hash next-hash))
-    next-hash))
+  (pcase next-hash
+    (`(,conf ,hash)
+     (when (not (equal hash
+                       (plist-get (org-tangle-config-read-hashes)
+                                  (intern conf))))
+       next-hash))))
 
 (defun org-tangle-config-get-config (org-file)
   "Get the path to a tangled configuration based on a given `ORG-FILE'."
@@ -99,7 +132,6 @@ Return `NEXT-HASH' if it is new."
   "Load an existing `CONFIG'."
     (if (file-exists-p config)
         (load-file config)))
-
 
 ;;; Auto-save hook function.
 (defun org-tangle-config-do-auto-tangle ()
@@ -114,7 +146,8 @@ Return `NEXT-HASH' if it is new."
 (defun org-tangle-config-do-tangle (new-hash &optional inter)
   "Tangle a new config, record the `NEW-HASH' and alert user based on `INTER'.
 Meant for internal use.  Return `NEW-HASH' if tangle is done."
-  (if (and (featurep 'org) (stringp new-hash))
+  (require 'org nil t)
+  (if (not (null new-hash))
       (progn
         (require 'org)
         (org-tangle-config-record-hash new-hash)
