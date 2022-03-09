@@ -30,7 +30,7 @@
 ;; extension
 
 ;;;  Example:
-;; (require 'compare-config)
+;; (require 'org-tangle-config)
 ;; If no path is provided the default is "~/.emacs.d/config.org"
 ;; (org-tangle-config-before-load "/path/to/file.org")
 
@@ -49,14 +49,6 @@
   "A basic cryptographic hash of the last known config version."
   :type 'string
   :group 'org-tangle-config)
-
-(defun org-tangle-config-set-enable (sym value)
-  "Set the `SYM' (`org-tangle-config-enable') to a new `VALUE'.
-After that, add or remove the auto-save hook as needed."
-  (set sym value)
-  (funcall (if value #'add-hook #'remove-hook)
-           'after-save-hook
-           #'org-tangle-config-do-auto-tangle))
 
 (defcustom org-tangle-config-enable nil
   "Whether or not to auto-tangle the configuration on `after-save-hook'."
@@ -111,7 +103,6 @@ Return `NEXT-HASH' if it is new."
          org-tangle-config-org-file))
        t)))
 
-;;;###autoload
 (defun org-tangle-config-do-tangle (new-hash &optional inter)
   "Tangle a new config, record the `NEW-HASH' and alert user based on `INTER'.
 Meant for internal use.  Return `NEW-HASH' if tangle is done."
@@ -125,6 +116,15 @@ Meant for internal use.  Return `NEW-HASH' if tangle is done."
          (if inter #'message #'message-box)
          "Your configuration has been tangled. Restart Emacs to use it.")
         new-hash)))
+
+;;;###autoload
+(defun org-tangle-config-set-enable (sym value)
+  "Set the `SYM' (`org-tangle-config-enable') to a new `VALUE'.
+After that, add or remove the auto-save hook as needed."
+  (set sym value)
+  (funcall (if value #'add-hook #'remove-hook)
+           'after-save-hook
+           #'org-tangle-config-do-auto-tangle))
 
 ;;;###autoload
 (defun org-tangle-config-enable (&optional enable)
@@ -165,6 +165,5 @@ Tangle a new config if the org configuration has changed."
            org-tangle-config-org-file)))))
   :group 'org-tangle-config)
 
-;;;###autoload
 (provide 'org-tangle-config)
 ;;; org-tangle-config.el ends here
