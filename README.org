@@ -70,8 +70,9 @@ Use straight.el, explicitly set configuration file, enable auto-tangling:
    :host github
    :repo "trev-dev/org-tangle-config.el"))
 
-(setq org-tangle-config-org-file "~/.emacs.d/config.org"
-      org-tangle-config-enable t)
+(setq org-tangle-config-org-file "~/.emacs.d/config.org" ; set org config
+      org-tangle-config-enable t) ; enable auto-tangling
+(org-tangle-config-before-load) ; check version before loading config
 #+end_src
 
 "I prefer to compose it myself"
