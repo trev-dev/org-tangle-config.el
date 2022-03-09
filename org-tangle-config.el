@@ -150,18 +150,15 @@ After that, add or remove the auto-save hook as needed."
 (defun org-tangle-config-before-load (&optional config)
   "Compare your Org `CONFIG' to its previous version.
 Tangle a new config if the org configuration has changed."
-  (add-hook
-   'after-init-hook
-   (lambda ()
-     (if (stringp config)
-         (setq org-tangle-config-org-file config))
-     (if (not (org-tangle-config-do-tangle
-               (org-tangle-config-new-hash
-                (org-tangle-config-get-hash
-                 org-tangle-config-org-file))))
-         (org-tangle-config-load
-          (org-tangle-config-get-config
-           org-tangle-config-org-file)))))
+  (if (stringp config)
+      (setq org-tangle-config-org-file config))
+  (if (not (org-tangle-config-do-tangle
+            (org-tangle-config-new-hash
+             (org-tangle-config-get-hash
+              org-tangle-config-org-file))))
+      (org-tangle-config-load
+       (org-tangle-config-get-config
+        org-tangle-config-org-file)))
   :group 'org-tangle-config)
 
 (provide 'org-tangle-config)
