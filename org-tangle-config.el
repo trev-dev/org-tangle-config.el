@@ -3,7 +3,7 @@
 ;; Copyright (C) Trevor Richards
 
 ;; Author: Trevor Richards <trev@trevdev.ca>
-;; Version: 1.0.2
+;; Version: 0.3.0
 ;; Keywords: performance, utility
 ;; URL: https://github.com/trev-dev/org-tangle-config.el
 
