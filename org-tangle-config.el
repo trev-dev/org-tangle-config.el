@@ -50,6 +50,14 @@
   :type 'string
   :group 'org-tangle-config)
 
+(defun org-tangle-config-set-enable (sym value)
+  "Set the `SYM' (`org-tangle-config-enable') to a new `VALUE'.
+After that, add or remove the auto-save hook as needed."
+  (set sym value)
+  (funcall (if value #'add-hook #'remove-hook)
+           'after-save-hook
+           #'org-tangle-config-do-auto-tangle))
+
 (defcustom org-tangle-config-enable nil
   "Whether or not to auto-tangle the configuration on `after-save-hook'."
   :type 'boolean
@@ -115,15 +123,6 @@ Meant for internal use.  Return `NEW-HASH' if tangle is done."
          (if inter #'message #'message-box)
          "Your configuration has been tangled. Restart Emacs to use it.")
         new-hash)))
-
-;;;###autoload
-(defun org-tangle-config-set-enable (sym value)
-  "Set the `SYM' (`org-tangle-config-enable') to a new `VALUE'.
-After that, add or remove the auto-save hook as needed."
-  (set sym value)
-  (funcall (if value #'add-hook #'remove-hook)
-           'after-save-hook
-           #'org-tangle-config-do-auto-tangle))
 
 ;;;###autoload
 (defun org-tangle-config-enable (&optional enable)
