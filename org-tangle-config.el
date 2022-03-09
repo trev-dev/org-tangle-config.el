@@ -106,10 +106,9 @@ Return `NEXT-HASH' if it is new."
 (defun org-tangle-config-do-tangle (new-hash &optional inter)
   "Tangle a new config, record the `NEW-HASH' and alert user based on `INTER'.
 Meant for internal use.  Return `NEW-HASH' if tangle is done."
-  (if (not (functionp 'org-babel-tangle-file))
-      (require 'org))
-  (if (stringp new-hash)
+  (if (and (featurep 'org) (stringp new-hash))
       (progn
+        (require 'org)
         (org-tangle-config-record-hash new-hash)
         (org-babel-tangle-file org-tangle-config-org-file)
         (funcall
