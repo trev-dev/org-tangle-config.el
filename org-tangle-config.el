@@ -3,7 +3,7 @@
 ;; Copyright (C) Trevor Richards
 
 ;; Author: Trevor Richards <trev@trevdev.ca>
-;; Version: 0.4.0
+;; Version: 0.4.1
 ;; Keywords: performance, utility
 ;; URL: https://github.com/trev-dev/org-tangle-config.el
 
@@ -146,10 +146,9 @@ Return `NEXT-HASH' if it is new."
 (defun org-tangle-config-do-tangle (new-hash &optional inter)
   "Tangle a new config, record the `NEW-HASH' and alert user based on `INTER'.
 Meant for internal use.  Return `NEW-HASH' if tangle is done."
-  (require 'org nil t)
   (if (not (null new-hash))
       (progn
-        (require 'org)
+        (require 'org nil t)
         (org-tangle-config-record-hash new-hash)
         (org-babel-tangle-file org-tangle-config-org-file)
         (funcall
