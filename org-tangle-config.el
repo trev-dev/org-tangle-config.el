@@ -3,7 +3,7 @@
 ;; Copyright (C) Trevor Richards
 
 ;; Author: Trevor Richards <trev@trevdev.ca>
-;; Version: 0.4.1
+;; Version: 0.4.2
 ;; Keywords: performance, utility
 ;; URL: https://github.com/trev-dev/org-tangle-config.el
 
@@ -124,14 +124,20 @@ Return `NEXT-HASH' if it is new."
 
 (defun org-tangle-config-get-config (org-file)
   "Get the path to a tangled configuration based on a given `ORG-FILE'."
-  (format "%s%s.el"
-          (file-name-directory (expand-file-name org-file))
-          (file-name-sans-extension (file-name-nondirectory org-file))))
+  (let ((conf (format "%s%s.el"
+                       (file-name-directory (expand-file-name org-file))
+                       (file-name-sans-extension
+                        (file-name-nondirectory org-file)))))
+    (if (file-exists-p conf)
+        conf)))
 
 (defun org-tangle-config-load (config)
   "Load an existing `CONFIG'."
-    (if (file-exists-p config)
-        (load-file config)))
+    (if (and config (file-exists-p config))
+        (load-file config)
+      (org-tangle-config-do-tangle
+       (org-tangle-config-get-hash
+        org-tangle-config-org-file))))
 
 ;;; Auto-save hook function.
 (defun org-tangle-config-do-auto-tangle ()
