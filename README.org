@@ -1,6 +1,7 @@
 * Org Tangle Config
 This package was written out of the necessity to be able to tangle my literate Emacs init file on-demand without having to =(require 'org)= early in my =init.el=. This solution works better than =org-babel-load-file= for myself because I sometimes like to play around with package managers or different versions of org.
 
+**Archive Notice**:  This package was experimental and has been proven to be unneccessary for me.  It will no longer be maintained and I doubt it is of much use to anyone, anyway.
 This package has 3 goals in mind.
 
 1. Be able to call a tangle on demand.
